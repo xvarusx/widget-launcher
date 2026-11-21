@@ -154,7 +154,7 @@ PanelWindow {
                 placeholderTextColor: window.palette.dark_foreground
                 leftPadding: 14
                 background: Rectangle {
-                    radius: 10
+                    radius: Number(window.palette.corner_radius || 0)
                     color: window.palette.dark_background
                     border.width: searchField.activeFocus ? 2 : 1
                     border.color: searchField.activeFocus

@@ -21,7 +21,7 @@ Button {
     }
 
     background: Rectangle {
-        radius: 9
+        radius: Number(window.palette.corner_radius || 0)
         color: control.selected ? control.themePalette.accent : control.themePalette.lighter_background
         border.width: control.selected ? 0 : 1
         border.color: control.themePalette.muted

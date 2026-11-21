@@ -22,7 +22,7 @@ Button {
     }
 
     background: Rectangle {
-        radius: 8
+        radius: Number(window.palette.corner_radius || 0)
         color: control.accent
             ? control.themeColors.accent
             : control.down

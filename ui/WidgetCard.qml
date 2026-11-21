@@ -15,7 +15,7 @@ Rectangle {
 
     width: viewMode === "grid" ? 218 : 1
     height: viewMode === "grid" ? 246 : 104
-    radius: 14
+    radius: Number(window.palette.corner_radius || 0)
     color: palette.lighter_background
     border.width: 1
     border.color: palette.muted

@@ -15,7 +15,7 @@ Dialog {
 
     background: Rectangle {
         color: dialog.palette.background
-        radius: 16
+        radius: Number(window.palette.corner_radius || 0)
         border.width: 1
         border.color: dialog.palette.muted
     }
