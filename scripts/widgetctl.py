@@ -261,17 +261,17 @@ def set_autostart(config: str, enabled: bool) -> dict:
         if not qs_path:
             return {"error": "Could not find 'qs' in PATH; cannot create the startup service."}
         unit = (
-            "[Unit]\\n"
-            f"Description=Quickshell widget: {config}\\n"
-            "After=graphical-session.target\\n"
-            "PartOf=graphical-session.target\\n\\n"
-            "[Service]\\n"
-            "Type=simple\\n"
-            f"ExecStart={qs_path} -c {config}\\n"
-            "Restart=on-failure\\n"
-            "RestartSec=2\\n\\n"
-            "[Install]\\n"
-            "WantedBy=default.target\\n"
+            "[Unit]\n"
+            f"Description=Quickshell widget: {config}\n"
+            "After=graphical-session.target\n"
+            "PartOf=graphical-session.target\n\n"
+            "[Service]\n"
+            "Type=simple\n"
+            f"ExecStart={qs_path} -c {config}\n"
+            "Restart=on-failure\n"
+            "RestartSec=2\n\n"
+            "[Install]\n"
+            "WantedBy=default.target\n"
         )
         temporary = unit_path.with_suffix(".tmp")
         temporary.write_text(unit, encoding="utf-8")
