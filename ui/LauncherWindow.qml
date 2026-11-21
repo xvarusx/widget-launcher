@@ -101,49 +101,6 @@ PanelWindow {
             anchors.margins: 24
             spacing: 16
 
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: 12
-
-                ColumnLayout {
-                    spacing: 3
-
-                    Label {
-                        text: "Widget Library"
-                        color: window.palette.foreground
-                        font.pixelSize: 25
-                        font.weight: Font.DemiBold
-                    }
-
-                    Label {
-                        text: "Your Quickshell widgets, in one place"
-                        color: window.palette.dark_foreground
-                        font.pixelSize: 12
-                    }
-                }
-
-                Item { Layout.fillWidth: true }
-
-                Label {
-                    text: window.service.widgets.length + " widgets"
-                    color: window.palette.dark_foreground
-                    font.pixelSize: 11
-                }
-
-                ThemedButton {
-                    themeColors: window.palette
-                    text: "Settings"
-                    onClicked: settingsDialog.open()
-                }
-
-                ThemedButton {
-                    themeColors: window.palette
-                    text: window.service.scanning ? "Scanning…" : "Refresh"
-                    enabled: !window.service.scanning
-                    onClicked: window.service.refresh()
-                }
-            }
-
             TextField {
                 id: searchField
                 Layout.fillWidth: true
@@ -185,6 +142,26 @@ PanelWindow {
                             onClicked: window.activeCategory = modelData
                         }
                     }
+
+                    Label {
+                        text: window.service.widgets.length + " widgets"
+                        color: window.palette.dark_foreground
+                        font.pixelSize: 11
+                    }
+
+                  ThemedButton {
+                      themeColors: window.palette
+                      text: "⛭"
+                      onClicked: settingsDialog.open()
+                  }
+
+                  ThemedButton {
+                      themeColors: window.palette
+                      text: window.service.scanning ? "…" : "🗘"
+                      enabled: !window.service.scanning
+                      onClicked: window.service.refresh()
+                  }
+
                 }
             }
 
