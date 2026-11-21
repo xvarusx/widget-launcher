@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-
+import "components"
 Dialog {
     id: dialog
 
@@ -12,7 +12,9 @@ Dialog {
     title: "Launcher settings"
     standardButtons: Dialog.Close
     width: Math.min(500, parent ? parent.width - 32 : 500)
-
+    padding: 20
+    topPadding: 12
+    bottomPadding: 12
     background: Rectangle {
         color: dialog.palette.background
         radius: Number(window.palette.corner_radius || 0)
