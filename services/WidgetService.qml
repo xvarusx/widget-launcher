@@ -2,7 +2,10 @@ import Quickshell
 import Quickshell.Io
 import QtQuick
 
-QtObject {
+Item {
+    visible: false
+    width: 0
+    height: 0
     id: service
 
     readonly property string backend: Quickshell.shellDir + "/scripts/widgetctl.py"
