@@ -3,16 +3,23 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-FloatingWindow {
+PanelWindow {
     id: window
 
     required property var service
     readonly property var palette: service.theme
 
-    title: "Widget Launcher"
-    implicitWidth: 1040
-    implicitHeight: 760
-    minimumSize: Qt.size(680, 520)
+    // Full-screen transparent layer surface; only the centered card is visible.
+    // This behaves like Omarchy's keybindings/app-launcher overlays, not a
+    // normal maximizable application window.
+    anchors {
+        top: true
+        bottom: true
+        left: true
+        right: true
+    }
+    aboveWindows: true
+    focusable: true
     color: "transparent"
 
     property string searchText: ""
@@ -55,9 +62,23 @@ FloatingWindow {
         return result
     }
 
-    Rectangle {
+    Item {
         anchors.fill: parent
-        radius: 20
+        focus: true
+
+        Keys.onEscapePressed: window.visible = false
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: window.visible = false
+        }
+
+        Rectangle {
+        id: launcherCard
+        anchors.centerIn: parent
+        width: Math.min(1080, parent.width - 64)
+        height: Math.min(760, parent.height - 64)
+        radius: Number(window.palette.corner_radius || 0)
         color: Qt.rgba(
             window.palette.background.r,
             window.palette.background.g,
@@ -66,6 +87,13 @@ FloatingWindow {
         )
         border.width: 1
         border.color: window.palette.muted
+        z: 1
+
+        // Keep clicks inside the launcher from reaching the outside-to-close area.
+        MouseArea {
+            anchors.fill: parent
+            onClicked: function(mouse) { mouse.accepted = true }
+        }
 
         ColumnLayout {
             anchors.fill: parent
@@ -233,6 +261,7 @@ FloatingWindow {
                     elide: Text.ElideRight
                 }
             }
+        }
         }
     }
 

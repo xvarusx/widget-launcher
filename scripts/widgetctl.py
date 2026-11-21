@@ -87,6 +87,32 @@ def save_settings(incoming: dict) -> dict:
     return current
 
 
+def read_corner_radius() -> int:
+    """Read the active Hyprland rounding value used by Omarchy."""
+    try:
+        result = subprocess.run(
+            ["hyprctl", "-j", "getoption", "decoration:rounding"],
+            capture_output=True, text=True, timeout=2, check=True,
+        )
+        payload = json.loads(result.stdout)
+        value = payload.get("int", payload.get("float", 0))
+        return max(0, min(64, int(float(value))))
+    except (OSError, subprocess.SubprocessError, json.JSONDecodeError, TypeError, ValueError):
+        pass
+
+    # Fallback for Omarchy's Lua config and older Hyprland config layouts.
+    config_root = Path.home() / ".config/hypr"
+    for filename in ("looknfeel.lua", "looknfeel.conf", "hyprland.conf"):
+        try:
+            raw = (config_root / filename).read_text(encoding="utf-8")
+        except OSError:
+            continue
+        matches = re.findall(r"\\brounding\\s*=\\s*(\\d+(?:\\.\\d+)?)", raw)
+        if matches:
+            return max(0, min(64, int(float(matches[-1]))))
+    return 0
+
+
 def read_palette() -> dict:
     palette = {
         "background": "#171717", "dark_background": "#101010",
@@ -110,6 +136,7 @@ def read_palette() -> dict:
                 palette[key] = value
     except (OSError, ValueError):
         pass
+    palette["corner_radius"] = read_corner_radius()
     return palette
 
 
