@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import "."
 
 Rectangle {
     id: card
@@ -15,7 +16,7 @@ Rectangle {
 
     width: viewMode === "grid" ? 218 : 1
     height: viewMode === "grid" ? 246 : 104
-    radius: Number(window.palette.corner_radius || 0)
+    radius: Number(card.palette.corner_radius || 0)
     color: palette.lighter_background
     border.width: 1
     border.color: palette.muted

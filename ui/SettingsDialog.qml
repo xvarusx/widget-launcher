@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import "components"
+
 Dialog {
     id: dialog
 
@@ -10,14 +11,14 @@ Dialog {
 
     modal: true
     title: "Launcher settings"
-    standardButtons: Dialog.Close
     width: Math.min(500, parent ? parent.width - 32 : 500)
     padding: 20
     topPadding: 12
     bottomPadding: 12
+
     background: Rectangle {
         color: dialog.palette.background
-        radius: Number(window.palette.corner_radius || 0)
+        radius: Number(dialog.palette.corner_radius || 0)
         border.width: 1
         border.color: dialog.palette.muted
     }
@@ -29,6 +30,21 @@ Dialog {
         font.weight: Font.DemiBold
         padding: 20
         bottomPadding: 4
+    }
+
+    footer: DialogButtonBox {
+        alignment: Qt.AlignRight
+        padding: 12
+
+        background: Rectangle {
+            color: "transparent"
+        }
+
+        ThemedButton {
+            themeColors: dialog.palette
+            text: "Close"
+            DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
+        }
     }
 
     contentItem: Flickable {
@@ -56,7 +72,9 @@ Dialog {
                     color: dialog.palette.foreground
                 }
 
-                ComboBox {
+                ThemeComboBox {
+                    Layout.preferredWidth: 150
+                    themePalette: dialog.palette
                     model: ["Grid", "List"]
                     currentIndex: dialog.service.settings.view_mode === "list" ? 1 : 0
                     onActivated: dialog.service.updateSetting(
@@ -74,8 +92,10 @@ Dialog {
                     color: dialog.palette.foreground
                 }
 
-                Slider {
+                ThemeSlider {
                     id: opacitySlider
+                    Layout.fillWidth: true
+                    themePalette: dialog.palette
                     from: 70
                     to: 100
                     stepSize: 1
@@ -101,19 +121,25 @@ Dialog {
                 font.weight: Font.DemiBold
             }
 
-            CheckBox {
+            ThemeCheckBox {
+                Layout.fillWidth: true
+                themePalette: dialog.palette
                 text: "Capture previews for running widgets"
                 checked: dialog.service.settings.auto_capture_previews
                 onToggled: dialog.service.updateSetting("auto_capture_previews", checked)
             }
 
-            CheckBox {
+            ThemeCheckBox {
+                Layout.fillWidth: true
+                themePalette: dialog.palette
                 text: "Show favorites first"
                 checked: dialog.service.settings.show_favorites_first
                 onToggled: dialog.service.updateSetting("show_favorites_first", checked)
             }
 
-            CheckBox {
+            ThemeCheckBox {
+                Layout.fillWidth: true
+                themePalette: dialog.palette
                 text: "Enable global shortcut"
                 checked: dialog.service.settings.global_shortcut_enabled
                 onToggled: dialog.service.updateSetting("global_shortcut_enabled", checked)
@@ -128,7 +154,9 @@ Dialog {
                     color: dialog.palette.foreground
                 }
 
-                ComboBox {
+                ThemeComboBox {
+                    Layout.preferredWidth: 150
+                    themePalette: dialog.palette
                     model: ["Off", "5 seconds", "8 seconds", "15 seconds", "30 seconds"]
                     currentIndex: {
                         const value = Number(dialog.service.settings.auto_refresh_seconds)

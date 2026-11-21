@@ -6,7 +6,7 @@ Rectangle {
     required property var widget
     required property var palette
 
-    radius: Number(window.palette.corner_radius || 0)
+    radius: Number(preview.palette.corner_radius || 0)
     color: palette.dark_background
     border.width: 1
     border.color: palette.muted
