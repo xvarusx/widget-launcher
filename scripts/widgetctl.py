@@ -7,6 +7,7 @@ import json
 import os
 import re
 import signal
+import shutil
 import subprocess
 import sys
 import time
@@ -26,11 +27,9 @@ LAUNCHER_CONFIG = Path(__file__).resolve().parents[1].name
 
 DEFAULT_SETTINGS = {
     "view_mode": "grid",
-    "favorites": [],
     "auto_refresh_seconds": 8,
     "auto_capture_previews": True,
     "global_shortcut_enabled": True,
-    "show_favorites_first": True,
     "window_opacity": 94,
 }
 
@@ -59,9 +58,8 @@ def load_settings() -> dict:
 
     if settings.get("view_mode") not in ("grid", "list"):
         settings["view_mode"] = "grid"
-    settings["favorites"] = sorted(set(
-        item for item in settings.get("favorites", []) if isinstance(item, str)
-    ))
+    settings.pop("favorites", None)
+    settings.pop("show_favorites_first", None)
     try:
         settings["auto_refresh_seconds"] = max(0, min(60, int(settings["auto_refresh_seconds"])))
         settings["window_opacity"] = max(70, min(100, int(settings["window_opacity"])))
@@ -75,9 +73,8 @@ def save_settings(incoming: dict) -> dict:
     current.update({key: value for key, value in incoming.items() if key in DEFAULT_SETTINGS})
     if current["view_mode"] not in ("grid", "list"):
         current["view_mode"] = "grid"
-    current["favorites"] = sorted(set(
-        item for item in current.get("favorites", []) if isinstance(item, str)
-    ))
+    current.pop("favorites", None)
+    current.pop("show_favorites_first", None)
     current["auto_refresh_seconds"] = max(0, min(60, int(current["auto_refresh_seconds"])))
     current["window_opacity"] = max(70, min(100, int(current["window_opacity"])))
     STATE_ROOT.mkdir(parents=True, exist_ok=True)
@@ -233,6 +230,73 @@ def capture_hyprland_preview(config: str, pids: list[int]) -> str:
     return ""
 
 
+def autostart_unit(config: str) -> str:
+    return f"widget-launcher-{config}.service"
+
+
+def autostart_enabled(config: str) -> bool:
+    unit = autostart_unit(config)
+    try:
+        result = subprocess.run(
+            ["systemctl", "--user", "is-enabled", unit],
+            capture_output=True, text=True, timeout=3,
+        )
+        return result.returncode == 0 and result.stdout.strip() == "enabled"
+    except (OSError, subprocess.SubprocessError):
+        return False
+
+
+def set_autostart(config: str, enabled: bool) -> dict:
+    folder = CONFIG_ROOT / config
+    if not (folder / "shell.qml").is_file():
+        return {"error": f"Configuration '{config}' was not found."}
+
+    systemd_dir = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "systemd/user"
+    systemd_dir.mkdir(parents=True, exist_ok=True)
+    unit_name = autostart_unit(config)
+    unit_path = systemd_dir / unit_name
+
+    if enabled:
+        qs_path = shutil.which("qs")
+        if not qs_path:
+            return {"error": "Could not find 'qs' in PATH; cannot create the startup service."}
+        unit = (
+            "[Unit]\\n"
+            f"Description=Quickshell widget: {config}\\n"
+            "After=graphical-session.target\\n"
+            "PartOf=graphical-session.target\\n\\n"
+            "[Service]\\n"
+            "Type=simple\\n"
+            f"ExecStart={qs_path} -c {config}\\n"
+            "Restart=on-failure\\n"
+            "RestartSec=2\\n\\n"
+            "[Install]\\n"
+            "WantedBy=default.target\\n"
+        )
+        temporary = unit_path.with_suffix(".tmp")
+        temporary.write_text(unit, encoding="utf-8")
+        temporary.replace(unit_path)
+        commands = [
+            ["systemctl", "--user", "daemon-reload"],
+            ["systemctl", "--user", "enable", "--now", unit_name],
+        ]
+    else:
+        commands = [
+            ["systemctl", "--user", "disable", "--now", unit_name],
+        ]
+
+    for command in commands:
+        try:
+            result = subprocess.run(command, capture_output=True, text=True, timeout=10)
+        except (OSError, subprocess.SubprocessError) as error:
+            return {"error": f"Could not update auto-start for '{config}': {error}"}
+        if result.returncode != 0:
+            detail = (result.stderr or result.stdout).strip()
+            return {"error": detail or f"Command failed: {' '.join(command)}"}
+
+    return {"ok": True, "autostart": enabled}
+
+
 def scan() -> dict:
     settings = load_settings()
     running = process_table()
@@ -275,6 +339,7 @@ def scan() -> dict:
                 "preview": preview,
                 "preview_kind": preview_kind,
                 "running": bool(pids),
+                "autostart": autostart_enabled(folder.name),
                 "pids": pids,
             })
 
@@ -325,7 +390,7 @@ def restart(config: str) -> dict:
 
 def main(argv: list[str]) -> int:
     if len(argv) < 2:
-        emit({"error": "Expected scan, theme, launch, stop, restart, or settings-set."})
+        emit({"error": "Expected scan, theme, launch, stop, restart, autostart-enable, autostart-disable, or settings-set."})
         return 2
 
     command = argv[1]
@@ -345,6 +410,18 @@ def main(argv: list[str]) -> int:
         except (IndexError, json.JSONDecodeError, ValueError, TypeError) as error:
             emit({"error": str(error)})
             return 2
+
+    if command in ("autostart-enable", "autostart-disable"):
+        if len(argv) < 3:
+            emit({"error": f"{command} requires a configuration name."})
+            return 2
+        config = argv[2]
+        if not re.fullmatch(r"[A-Za-z0-9_.+-]+", config):
+            emit({"error": "Invalid widget configuration name."})
+            return 2
+        result = set_autostart(config, command == "autostart-enable")
+        emit(result)
+        return 1 if result.get("error") else 0
 
     if command in ("launch", "stop", "restart"):
         if len(argv) < 3:

@@ -132,14 +132,6 @@ Dialog {
             ThemeCheckBox {
                 Layout.fillWidth: true
                 themePalette: dialog.palette
-                text: "Show favorites first"
-                checked: dialog.service.settings.show_favorites_first
-                onToggled: dialog.service.updateSetting("show_favorites_first", checked)
-            }
-
-            ThemeCheckBox {
-                Layout.fillWidth: true
-                themePalette: dialog.palette
                 text: "Enable global shortcut"
                 checked: dialog.service.settings.global_shortcut_enabled
                 onToggled: dialog.service.updateSetting("global_shortcut_enabled", checked)
@@ -176,7 +168,7 @@ Dialog {
             Label {
                 Layout.fillWidth: true
                 wrapMode: Text.WordWrap
-                text: "Colors follow Omarchy's active theme. The global shortcut also needs a Hyprland bind; see the README."
+                text: "Colors follow Omarchy's active theme. Widget auto-start is managed through systemd user services. The global shortcut also needs a Hyprland bind; see the README."
                 color: dialog.palette.dark_foreground
                 font.pixelSize: 11
             }

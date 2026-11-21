@@ -10,8 +10,6 @@ Rectangle {
     required property var service
     property string viewMode: "grid"
 
-    readonly property bool isFavorite:
-        (service.settings.favorites || []).indexOf(widget.name) >= 0
     readonly property var palette: service.theme
 
     width: viewMode === "grid" ? 218 : 1
@@ -82,10 +80,13 @@ Rectangle {
         ColumnLayout {
             spacing: 4
 
-            ThemedButton {
-                themeColors: card.palette
-                text: card.isFavorite ? "★" : "☆"
-                onClicked: card.service.toggleFavorite(card.widget.name)
+            ThemeSwitch {
+                themePalette: card.palette
+                checked: card.widget.autostart
+                onToggled: card.service.runAction(
+                    checked ? "autostart-enable" : "autostart-disable",
+                    card.widget.name
+                )
             }
 
             ThemedButton {
@@ -161,11 +162,24 @@ Rectangle {
                 }
             }
 
-            ThemedButton {
-                themeColors: card.palette
-                text: card.isFavorite ? "★" : "☆"
-                implicitWidth: 34
-                onClicked: card.service.toggleFavorite(card.widget.name)
+            ColumnLayout {
+                spacing: 2
+
+                ThemeSwitch {
+                    Layout.alignment: Qt.AlignRight
+                    themePalette: card.palette
+                    checked: card.widget.autostart
+                    onToggled: card.service.runAction(
+                        checked ? "autostart-enable" : "autostart-disable",
+                        card.widget.name
+                    )
+                }
+
+                Text {
+                    text: "Auto-start"
+                    color: card.palette.dark_foreground
+                    font.pixelSize: 9
+                }
             }
         }
 

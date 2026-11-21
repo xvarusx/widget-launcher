@@ -13,11 +13,9 @@ Item {
     property var widgets: []
     property var settings: ({
         view_mode: "grid",
-        favorites: [],
         auto_refresh_seconds: 8,
         auto_capture_previews: true,
         global_shortcut_enabled: true,
-        show_favorites_first: true,
         window_opacity: 94
     })
     property var theme: ({
@@ -42,17 +40,6 @@ Item {
     function updateSetting(key, value) {
         const next = Object.assign({}, settings)
         next[key] = value
-        settings = next
-        settingsProcess.exec(["python3", backend, "settings-set", JSON.stringify(next)])
-    }
-
-    function toggleFavorite(configName) {
-        const next = Object.assign({}, settings)
-        let favorites = (next.favorites || []).slice()
-        const index = favorites.indexOf(configName)
-        if (index >= 0) favorites.splice(index, 1)
-        else favorites.push(configName)
-        next.favorites = favorites
         settings = next
         settingsProcess.exec(["python3", backend, "settings-set", JSON.stringify(next)])
     }

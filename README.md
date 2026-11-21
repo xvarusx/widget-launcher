@@ -9,7 +9,7 @@ A widget library and process manager for Quickshell on Omarchy / Hyprland.
 - Search by name, category and description.
 - Grid and list layouts.
 - Running / stopped status, launch, stop and restart actions.
-- Persistent favorites and inferred or metadata-defined categories.
+- Per-widget auto-start at login through persistent systemd user services, plus inferred or metadata-defined categories.
 - Reads the active Omarchy palette from ~/.local/state/omarchy/current/theme/colors.toml.
 - Hyprland global shortcut and Quickshell IPC commands.
 - Settings stored under $XDG_STATE_HOME/quickshell/widget-launcher/.
@@ -117,6 +117,20 @@ When a widget has no image preview and is already running, the backend finds its
 ~/.cache/widget-launcher/previews/
 
 The launcher does not start stopped widgets just to take screenshots. This avoids unexpectedly opening every widget or creating duplicate instances. Launch a widget and refresh the library to capture its preview.
+
+## Per-widget auto-start
+
+Each widget card has an Auto-start switch. Enabling it creates a dedicated
+systemd user unit under ~/.config/systemd/user/ and enables/starts it with
+systemctl --user. Disabling the switch stops and disables that unit. These
+units start with the user's default systemd target at login.
+
+Manage the units manually with:
+
+~~~bash
+systemctl --user status widget-launcher-<widget-name>.service
+systemctl --user disable --now widget-launcher-<widget-name>.service
+~~~
 
 ## Settings and state
 
