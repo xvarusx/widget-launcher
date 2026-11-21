@@ -13,6 +13,7 @@ Rectangle {
     clip: true
 
     Image {
+        id: previewImage
         anchors.fill: parent
         anchors.margins: 5
         source: preview.widget.preview ? "file://" + preview.widget.preview : ""
@@ -25,7 +26,7 @@ Rectangle {
     Column {
         anchors.centerIn: parent
         spacing: 4
-        visible: !preview.widget.preview
+        visible: previewImage.status !== Image.Ready
 
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
@@ -50,12 +51,12 @@ Rectangle {
         opacity: 0.9
         width: previewLabel.implicitWidth + 12
         height: previewLabel.implicitHeight + 6
+        visible: preview.widget.preview_kind !== ""
 
         Text {
             id: previewLabel
             anchors.centerIn: parent
-            text: preview.widget.preview_kind === "generated" ? "CAPTURED" :
-                  preview.widget.preview_kind === "image" ? "PREVIEW" : ""
+            text: preview.widget.preview_kind === "generated" ? "CAPTURED" : "PREVIEW"
             color: preview.palette.foreground
             font.pixelSize: 8
             font.weight: Font.Bold

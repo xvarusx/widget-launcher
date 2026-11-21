@@ -18,18 +18,11 @@ QtObject {
         window_opacity: 94
     })
     property var theme: ({
-        background: "#171717",
-        dark_background: "#101010",
-        darker_background: "#090909",
-        lighter_background: "#262626",
-        foreground: "#f5f5f5",
-        dark_foreground: "#a3a3a3",
-        accent: "#89b4fa",
-        selection: "#343434",
-        muted: "#737373",
-        red: "#f38ba8",
-        green: "#a6e3a1",
-        blue: "#89b4fa"
+        background: "#171717", dark_background: "#101010",
+        darker_background: "#090909", lighter_background: "#262626",
+        foreground: "#f5f5f5", dark_foreground: "#a3a3a3",
+        accent: "#89b4fa", selection: "#343434", muted: "#737373",
+        red: "#f38ba8", green: "#a6e3a1", blue: "#89b4fa"
     })
 
     property bool loaded: false
@@ -54,10 +47,8 @@ QtObject {
         const next = Object.assign({}, settings)
         let favorites = (next.favorites || []).slice()
         const index = favorites.indexOf(configName)
-        if (index >= 0)
-            favorites.splice(index, 1)
-        else
-            favorites.push(configName)
+        if (index >= 0) favorites.splice(index, 1)
+        else favorites.push(configName)
         next.favorites = favorites
         settings = next
         settingsProcess.exec(["python3", backend, "settings-set", JSON.stringify(next)])
@@ -92,6 +83,21 @@ QtObject {
             onStreamFinished: {
                 if (this.text.trim().length > 0)
                     console.warn("Widget scanner:", this.text)
+            }
+        }
+    }
+
+    Process {
+        id: themeProcess
+        command: ["python3", service.backend, "theme"]
+
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    service.theme = JSON.parse(this.text)
+                } catch (error) {
+                    console.warn("Theme palette response:", this.text)
+                }
             }
         }
     }
@@ -147,6 +153,18 @@ QtObject {
         repeat: true
         running: service.loaded && Number(service.settings.auto_refresh_seconds || 0) > 0
         onTriggered: service.refresh()
+    }
+
+    // Palette polling is independent of widget auto-refresh so theme changes
+    // are reflected even when the user disables periodic widget scanning.
+    Timer {
+        interval: 3000
+        repeat: true
+        running: service.loaded
+        onTriggered: {
+            if (!themeProcess.running)
+                themeProcess.running = true
+        }
     }
 
     Component.onCompleted: refresh()

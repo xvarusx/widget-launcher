@@ -18,6 +18,16 @@ FloatingWindow {
     property string searchText: ""
     property string activeCategory: "All"
 
+    function categories() {
+        let values = ["All", "Favorites", "System", "Media", "Productivity",
+                      "Appearance", "Development", "Other"]
+        service.widgets.forEach(function(widget) {
+            if (widget.category && values.indexOf(widget.category) < 0)
+                values.push(widget.category)
+        })
+        return values
+    }
+
     function filteredWidgets() {
         const needle = searchText.trim().toLowerCase()
         let result = service.widgets.filter(function(widget) {
@@ -42,15 +52,18 @@ FloatingWindow {
                        Number(favorites.indexOf(a.name) >= 0)
             })
         }
-
         return result
     }
 
     Rectangle {
         anchors.fill: parent
         radius: 20
-        color: window.palette.background
-        opacity: Number(window.service.settings.window_opacity || 94) / 100
+        color: Qt.rgba(
+            window.palette.background.r,
+            window.palette.background.g,
+            window.palette.background.b,
+            Number(window.service.settings.window_opacity || 94) / 100
+        )
         border.width: 1
         border.color: window.palette.muted
 
@@ -88,13 +101,15 @@ FloatingWindow {
                     font.pixelSize: 11
                 }
 
-                Button {
-                    text: "⚙"
+                ThemedButton {
+                    themeColors: window.palette
+                    text: "Settings"
                     onClicked: settingsDialog.open()
                 }
 
-                Button {
-                    text: window.service.scanning ? "Scanning…" : "↻"
+                ThemedButton {
+                    themeColors: window.palette
+                    text: window.service.scanning ? "Scanning…" : "Refresh"
                     enabled: !window.service.scanning
                     onClicked: window.service.refresh()
                 }
@@ -131,8 +146,7 @@ FloatingWindow {
                     spacing: 7
 
                     Repeater {
-                        model: ["All", "Favorites", "System", "Media", "Productivity",
-                                "Appearance", "Development", "Other"]
+                        model: window.categories()
 
                         delegate: CategoryChip {
                             required property string modelData
@@ -158,7 +172,7 @@ FloatingWindow {
                 Item { Layout.fillWidth: true }
 
                 Label {
-                    text: "THEME: OMARCHY"
+                    text: "OMARCHY THEME"
                     color: window.palette.accent
                     font.pixelSize: 9
                     font.weight: Font.Bold
@@ -217,12 +231,6 @@ FloatingWindow {
                         ? window.palette.red : window.palette.dark_foreground
                     font.pixelSize: 10
                     elide: Text.ElideRight
-                }
-
-                Button {
-                    text: "Settings"
-                    flat: true
-                    onClicked: settingsDialog.open()
                 }
             }
         }

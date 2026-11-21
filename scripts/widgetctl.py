@@ -187,8 +187,11 @@ def capture_hyprland_preview(config: str, pids: list[int]) -> str:
         if not (isinstance(position, list) and len(position) == 2 and
                 isinstance(size, list) and len(size) == 2):
             continue
-        x, y = (int(value) for value in position)
-        width, height = (int(value) for value in size)
+        try:
+            x, y = (int(value) for value in position)
+            width, height = (int(value) for value in size)
+        except (TypeError, ValueError):
+            continue
         if width < 40 or height < 40:
             continue
         output.parent.mkdir(parents=True, exist_ok=True)
@@ -295,12 +298,15 @@ def restart(config: str) -> dict:
 
 def main(argv: list[str]) -> int:
     if len(argv) < 2:
-        emit({"error": "Expected scan, launch, stop, restart, or settings-set."})
+        emit({"error": "Expected scan, theme, launch, stop, restart, or settings-set."})
         return 2
 
     command = argv[1]
     if command == "scan":
         emit(scan())
+        return 0
+    if command == "theme":
+        emit(read_palette())
         return 0
     if command == "settings-set":
         try:

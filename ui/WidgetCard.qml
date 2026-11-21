@@ -81,22 +81,25 @@ Rectangle {
         ColumnLayout {
             spacing: 4
 
-            Button {
+            ThemedButton {
+                themeColors: card.palette
                 text: card.isFavorite ? "★" : "☆"
-                flat: true
                 onClicked: card.service.toggleFavorite(card.widget.name)
             }
 
-            Button {
-                text: card.widget.running ? "↻" : "▶"
+            ThemedButton {
+                themeColors: card.palette
+                accent: true
+                text: card.widget.running ? "Restart" : "Launch"
                 onClicked: card.service.runAction(
                     card.widget.running ? "restart" : "launch", card.widget.name
                 )
             }
 
-            Button {
+            ThemedButton {
+                themeColors: card.palette
                 visible: card.widget.running
-                text: "■"
+                text: "Stop"
                 onClicked: card.service.runAction("stop", card.widget.name)
             }
         }
@@ -157,19 +160,11 @@ Rectangle {
                 }
             }
 
-            Button {
+            ThemedButton {
+                themeColors: card.palette
                 text: card.isFavorite ? "★" : "☆"
-                flat: true
-                implicitWidth: 30
-                implicitHeight: 30
+                implicitWidth: 34
                 onClicked: card.service.toggleFavorite(card.widget.name)
-                contentItem: Text {
-                    text: parent.text
-                    color: card.isFavorite ? card.palette.accent : card.palette.dark_foreground
-                    font.pixelSize: 19
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
             }
         }
 
@@ -177,16 +172,19 @@ Rectangle {
             Layout.fillWidth: true
             spacing: 6
 
-            Button {
+            ThemedButton {
                 Layout.fillWidth: true
+                themeColors: card.palette
+                accent: true
                 text: card.widget.running ? "Restart" : "Launch"
                 onClicked: card.service.runAction(
                     card.widget.running ? "restart" : "launch", card.widget.name
                 )
             }
 
-            Button {
+            ThemedButton {
                 visible: card.widget.running
+                themeColors: card.palette
                 text: "Stop"
                 onClicked: card.service.runAction("stop", card.widget.name)
             }
