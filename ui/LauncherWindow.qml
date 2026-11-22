@@ -102,22 +102,45 @@ PanelWindow {
             spacing: 16
 
 
-            TextField {
-                id: searchField
+            // Search and global actions share one horizontal toolbar row.
+            RowLayout {
                 Layout.fillWidth: true
-                implicitHeight: 44
-                placeholderText: "Search by widget name, category or description…"
-                text: window.searchText
-                onTextChanged: window.searchText = text
-                color: window.palette.foreground
-                placeholderTextColor: window.palette.dark_foreground
-                leftPadding: 14
-                background: Rectangle {
-                    radius: Number(window.palette.corner_radius || 0)
-                    color: window.palette.dark_background
-                    border.width: searchField.activeFocus ? 2 : 1
-                    border.color: searchField.activeFocus
-                        ? window.palette.accent : window.palette.muted
+                spacing: 8
+
+                TextField {
+                    id: searchField
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 44
+                    placeholderText: "Search by widget name, category or description…"
+                    text: window.searchText
+                    onTextChanged: window.searchText = text
+                    color: window.palette.foreground
+                    placeholderTextColor: window.palette.dark_foreground
+                    leftPadding: 14
+                    background: Rectangle {
+                        radius: Number(window.palette.corner_radius || 0)
+                        color: window.palette.dark_background
+                        border.width: searchField.activeFocus ? 2 : 1
+                        border.color: searchField.activeFocus
+                            ? window.palette.accent : window.palette.muted
+                    }
+                }
+
+                ThemedButton {
+                    Layout.preferredWidth: 44
+                    Layout.preferredHeight: 44
+                    themeColors: window.palette
+                    text: "⛭"
+                    onClicked: settingsDialog.open()
+                }
+
+                ThemedButton {
+                    Layout.preferredWidth: 44
+                    Layout.preferredHeight: 44
+                    themeColors: window.palette
+                    text: window.service.scanning ? "…" : "⟳"
+                    enabled: !window.service.scanning
+                    onClicked: window.service.refresh()
                 }
             }
 
@@ -143,19 +166,6 @@ PanelWindow {
                             onClicked: window.activeCategory = modelData
                         }
                     }
-
-                  ThemedButton {
-                      themeColors: window.palette
-                      text: "⛭"
-                      onClicked: settingsDialog.open()
-                  }
-
-                  ThemedButton {
-                      themeColors: window.palette
-                      text: window.service.scanning ? "…" : "🗘"
-                      enabled: !window.service.scanning
-                      onClicked: window.service.refresh()
-                  }
 
                 }
             }
