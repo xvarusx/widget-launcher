@@ -144,12 +144,6 @@ PanelWindow {
                         }
                     }
 
-                    Label {
-                        text: window.service.widgets.length + " widgets"
-                        color: window.palette.dark_foreground
-                        font.pixelSize: 11
-                    }
-
                   ThemedButton {
                       themeColors: window.palette
                       text: "⛭"
