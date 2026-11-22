@@ -27,27 +27,27 @@ The launcher remains usable without grim; missing screenshots use a placeholder.
 
 Clone this repository as a named Quickshell configuration:
 
-~~~bash
+```bash
 git clone https://github.com/xvarusx/widget-launcher.git ~/.config/quickshell/widget-launcher
-~~~
+```
 
 If it is already installed:
 
-~~~bash
+```bash
 git -C ~/.config/quickshell/widget-launcher pull --ff-only
-~~~
+```
 
 Start it:
 
-~~~bash
+```bash
 qs -c widget-launcher
-~~~
+```
 
 ## Widget folder convention
 
 Each widget is a direct child of ~/.config/quickshell/ and contains shell.qml:
 
-~~~text
+```text
 ~/.config/quickshell/
 ├── widget-launcher/
 │   ├── shell.qml
@@ -60,18 +60,18 @@ Each widget is a direct child of ~/.config/quickshell/ and contains shell.qml:
 │   └── metadata.json
 └── system-monitor/
     └── shell.qml
-~~~
+```
 
 Optional metadata.json:
 
-~~~json
+```json
 {
   "name": "Music Player",
   "description": "Desktop music controller",
   "category": "Media",
   "preview": "preview.webp"
 }
-~~~
+```
 
 Supported inferred categories: System, Media, Productivity, Appearance, Development, and Other. Metadata can override the category.
 
@@ -81,26 +81,17 @@ Preview discovery checks metadata preview first, then preview.png, preview.webp,
 
 The shortcut uses Quickshell's Hyprland global-shortcuts integration. Add this to your Hyprland keybinds (commonly ~/.config/hypr/bindings.conf):
 
-~~~ini
-bind = SUPER, W, global, widget-launcher:toggle
-~~~
+```ini
+bind = SUPER, W, global, qs -c widget-launcher
+```
 
 Reload Hyprland:
 
-~~~bash
+```bash
 hyprctl reload
-~~~
+```
 
 Change SUPER + W to any free Hyprland shortcut by editing the bind. The Settings toggle enables or disables the launcher's response to the registered shortcut.
-
-You can also control the launcher through Quickshell IPC:
-
-~~~bash
-qs ipc call widget-launcher toggle
-qs ipc call widget-launcher show
-qs ipc call widget-launcher hide
-qs ipc call widget-launcher refresh
-~~~
 
 ## Omarchy theme integration
 
@@ -127,10 +118,10 @@ units start with the user's default systemd target at login.
 
 Manage the units manually with:
 
-~~~bash
+```bash
 systemctl --user status widget-launcher-<widget-name>.service
 systemctl --user disable --now widget-launcher-<widget-name>.service
-~~~
+```
 
 ## Settings and state
 
