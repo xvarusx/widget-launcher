@@ -27,7 +27,7 @@ PanelWindow {
     property string activeCategory: "All"
 
     function categories() {
-        let values = ["All", "System", "Media", "Productivity",
+        let values = ["All", "Favorites", "System", "Media", "Productivity",
                       "Appearance", "Development", "Other"]
         service.widgets.forEach(function(widget) {
             if (widget.category && values.indexOf(widget.category) < 0)
@@ -46,10 +46,20 @@ PanelWindow {
                 (widget.category || "").toLowerCase().includes(needle)
 
             const matchesCategory = activeCategory === "All" ||
-                widget.category === activeCategory
+                (activeCategory === "Favorites"
+                    ? (service.settings.favorites || []).indexOf(widget.name) >= 0
+                    : widget.category === activeCategory)
 
             return matchesText && matchesCategory
         })
+
+        if (service.settings.show_favorites_first) {
+            result.sort(function(a, b) {
+                const favorites = service.settings.favorites || []
+                return Number(favorites.indexOf(b.name) >= 0) -
+                       Number(favorites.indexOf(a.name) >= 0)
+            })
+        }
         return result
     }
 
@@ -91,6 +101,7 @@ PanelWindow {
             anchors.margins: 24
             spacing: 16
 
+
             TextField {
                 id: searchField
                 Layout.fillWidth: true
@@ -110,56 +121,48 @@ PanelWindow {
                 }
             }
 
-            RowLayout {
+            Flickable {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 38
-                spacing: 10
+                contentWidth: categoryRow.implicitWidth
+                contentHeight: height
+                clip: true
 
-                Flickable {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    contentWidth: categoryRow.implicitWidth
-                    contentHeight: height
-                    clip: true
+                Row {
+                    id: categoryRow
+                    spacing: 7
 
-                    Row {
-                        id: categoryRow
-                        spacing: 7
+                    Repeater {
+                        model: window.categories()
 
-                        Repeater {
-                            model: window.categories()
-
-                            delegate: CategoryChip {
-                                required property string modelData
-                                text: modelData
-                                themePalette: window.palette
-                                selected: window.activeCategory === modelData
-                                onClicked: window.activeCategory = modelData
-                            }
+                        delegate: CategoryChip {
+                            required property string modelData
+                            text: modelData
+                            themePalette: window.palette
+                            selected: window.activeCategory === modelData
+                            onClicked: window.activeCategory = modelData
                         }
                     }
-                }
 
-                Label {
-                    text: window.service.widgets.length + " widgets"
-                    color: window.palette.dark_foreground
-                    font.pixelSize: 11
-                    Layout.alignment: Qt.AlignVCenter
-                }
+                    Label {
+                        text: window.service.widgets.length + " widgets"
+                        color: window.palette.dark_foreground
+                        font.pixelSize: 11
+                    }
 
-                ThemedButton {
-                    themeColors: window.palette
-                    text: "⚙"
-                    implicitWidth: 38
-                    onClicked: settingsDialog.open()
-                }
+                  ThemedButton {
+                      themeColors: window.palette
+                      text: "⛭"
+                      onClicked: settingsDialog.open()
+                  }
 
-                ThemedButton {
-                    themeColors: window.palette
-                    text: window.service.scanning ? "…" : "↻"
-                    implicitWidth: 38
-                    enabled: !window.service.scanning
-                    onClicked: window.service.refresh()
+                  ThemedButton {
+                      themeColors: window.palette
+                      text: window.service.scanning ? "…" : "🗘"
+                      enabled: !window.service.scanning
+                      onClicked: window.service.refresh()
+                  }
+
                 }
             }
 
